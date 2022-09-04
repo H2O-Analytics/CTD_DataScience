@@ -8,5 +8,6 @@ train_df = pd.read_csv(DATA_PATH_TW + "train.csv")
 test_df = pd.read_csv(DATA_PATH_TW + "test.csv")
 
 # Exploratory Analysis
-
+# Check for missing values
+train_df.isna().sum()
 # Random Forest Prediction
