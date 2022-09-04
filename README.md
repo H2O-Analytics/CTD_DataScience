@@ -1,1 +1,1 @@
-# CTD_DataScience_Kaggle_Titanic
+# CTD_DataScience
