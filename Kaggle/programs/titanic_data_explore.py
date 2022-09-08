@@ -5,7 +5,7 @@ from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
 # Data input
-DATA_PATH_TW = "/Users/tawate/Library/CloudStorage/OneDrive-SAS/CDT_DataScience_Drive/kaggle_ds/titanic/"
+DATA_PATH_TW = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
 train_df = pd.read_csv(DATA_PATH_TW + "train.csv")
 test_df = pd.read_csv(DATA_PATH_TW + "test.csv")
 
