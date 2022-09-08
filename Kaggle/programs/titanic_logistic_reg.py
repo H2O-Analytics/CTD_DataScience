@@ -5,11 +5,13 @@ Purpose: Create end to end logistic regression to predict the suvival of a passe
 
 Developer: Taylor Waters
 
-Input
+Input:  train.csv:  titanic survival training set
+        test.csv:   titanc survival test set without predictor var
 
 Output
 
-Parameters
+Parameters:
+        DATA_PATH_TW:   path for TW google drive with kaggle titanic datasets
 
 Usage
 
@@ -68,7 +70,6 @@ train_df.groupby('Embarked').mean()
     # 1. Males were more likely to die vs females
     # 2. Embarking from Cherbourg gave increases liklihood of survival. 
     #    (higher fare prices)
-%matplotlib inline
 pd.crosstab(train_df.Sex, train_df.Survived).plot(kind = 'bar')
 pd.crosstab(train_df.Cabin, train_df.Survived).plot(kind = 'bar')
 pd.crosstab(train_df.Ticket, train_df.Survived).plot(kind = 'bar')
