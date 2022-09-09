@@ -15,14 +15,17 @@ Parameters:
 
 Usage
 
+Resources Used:
+        1. https://www.kaggle.com/competitions/titanic/data?select=train.csv
+        2. https://github.com/kennethleungty/Logistic-Regression-Assumptions/blob/main/Logistic_Regression_Assumptions.ipynb
+        3. https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8
+
 History:
 Date        User    Ticket #    Description
 08SEP2022   TW      ITKTP-11    | Initial Developement
-
+09SEP2022   TW      ITKTP-11    | Included variable manipulation and dummy variable creation
 """
 # Import Packages
-from ast import increment_lineno
-from difflib import IS_LINE_JUNK
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
@@ -85,7 +88,34 @@ train_df.Fare.hist(bins = 50)
 
 """
 Variable Manipulation
-    1. Create dummy variables
+    1. Impute mean of age for missing age
+    2. Remove Cabin, too many missing values. Remove name (does't matter and too sparse)
+    3. Impute mode of Embarked for missing Embarked
+    4. Create dummy variables
 """
+train_df['Age'] = train_df['Age'].fillna(train_df['Age'].median(skipna=True))
+train_df = train_df.drop(columns=['Cabin', 'Name', 'Ticket'])
+train_df['Embarked'] = train_df['Embarked'].fillna(train_df['Embarked'].mode()[0])
+print(train_df.isnull().sum()*100/len(train_df))
 
+# Create dummy variables
+#   Ticket is sparse, condider more investigation here
+cat_cols = ['Sex','Embarked','Pclass']
+train_df = pd.get_dummies(train_df, columns=cat_cols, drop_first=True) # Remove first variable to prevent coliniearity
+train_features = train_df.drop(columns=['Survived'])
+train_label = train_df['Survived']
 
+"""
+Testing Assumptions
+"""
+# only works for positive values
+train_df2 = train_df.drop(train_df[train_df['Age'] == 0].index)
+train_df2 = train_df2.drop(train_df[train_df['Fare'] == 0].index)
+
+"""
+Feature Selection
+
+"""
+import statsmodels.api as sm
+model = sm.Logit(endog=train_label, exog=train_features).fit()
+print(model.summary())
