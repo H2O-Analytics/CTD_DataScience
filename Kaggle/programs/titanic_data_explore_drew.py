@@ -5,9 +5,9 @@ from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
 # Data input
-DATA_PATH_TW = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
-train_df = pd.read_csv(DATA_PATH_TW + "train.csv")
-test_df = pd.read_csv(DATA_PATH_TW + "test.csv")
+DATA_PATH_DM = "/Users/drewmaclennan/Library/CloudStorage/GoogleDrive-dmaclennan7@gmail.com/.shortcut-targets-by-id/1zYOUecIzsLDVZFqSsvw6zZiBkCJY67pY/CDT_Data_Science/data_sets/Kaggle/Titanic/"
+train_df = pd.read_csv(DATA_PATH_DM + "train.csv")
+test_df = pd.read_csv(DATA_PATH_DM + "test.csv")
 
 # Exploratory Analysis
 # Check for missing values
