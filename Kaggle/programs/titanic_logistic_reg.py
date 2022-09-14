@@ -19,7 +19,7 @@ Resources Used:
         1. https://www.kaggle.com/competitions/titanic/data?select=train.csv
         2. https://github.com/kennethleungty/Logistic-Regression-Assumptions/blob/main/Logistic_Regression_Assumptions.ipynb
         3. https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8
-
+        
 History:
 Date        User    Ticket #    Description
 08SEP2022   TW      ITKTP-11    | Initial Developement
