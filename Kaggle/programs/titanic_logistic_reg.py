@@ -36,9 +36,9 @@ import matplotlib.pyplot as plt
 
 
 # Input data sets
-DATA_PATH_TW = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
-train_df = pd.read_csv(DATA_PATH_TW + "train.csv")
-test_df = pd.read_csv(DATA_PATH_TW + "test.csv")
+DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
+train_df = pd.read_csv(DATA_PATH + "train.csv")
+test_df = pd.read_csv(DATA_PATH + "test.csv")
 
 """
 Exploratory Analysis
@@ -88,7 +88,7 @@ train_df.Fare.hist(bins = 50)
 
 """
 Variable Manipulation
-    1. Impute mean of age for missing age
+    1. Impute median of age for missing age
     2. Remove Cabin, too many missing values. Remove name (does't matter and too sparse)
     3. Impute mode of Embarked for missing Embarked
     4. Create dummy variables
