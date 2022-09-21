@@ -13,7 +13,7 @@ Output
 Parameters:
         DATA_PATH_TW:   path for TW google drive with kaggle titanic datasets
 
-Usage
+Usage:
 
 Resources Used:
         1. https://www.kaggle.com/competitions/titanic/data?select=train.csv
@@ -33,7 +33,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 
 # Input data sets
 DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
@@ -101,9 +100,10 @@ print(train_df.isnull().sum()*100/len(train_df))
 # Create dummy variables
 #   Ticket is sparse, condider more investigation here
 cat_cols = ['Sex','Embarked','Pclass']
-train_df = pd.get_dummies(train_df, columns=cat_cols, drop_first=True) # Remove first variable to prevent coliniearity
-train_features = train_df.drop(columns=['Survived'])
-train_label = train_df['Survived']
+# Remove first variable to prevent coliniearity
+train_df_onehot = pd.get_dummies(train_df, columns=cat_cols, drop_first=True)
+train_features = train_df_onehot.drop(columns=['Survived'])
+train_label = train_df_onehot['Survived']
 
 """
 Testing Assumptions
@@ -114,7 +114,6 @@ train_df2 = train_df2.drop(train_df[train_df['Fare'] == 0].index)
 
 """
 Feature Selection
-
 """
 import statsmodels.api as sm
 model = sm.Logit(endog=train_label, exog=train_features).fit()
