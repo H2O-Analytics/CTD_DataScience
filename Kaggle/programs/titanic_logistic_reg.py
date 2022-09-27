@@ -24,6 +24,7 @@ History:
 Date        User    Ticket #    Description
 08SEP2022   TW      ITKTP-11    | Initial Developement
 09SEP2022   TW      ITKTP-11    | Included variable manipulation and dummy variable creation
+26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 """
 # Import Packages
 from asyncio import threads
@@ -112,17 +113,18 @@ print(train_df.isnull().sum()*100/len(train_df))
 cat_cols = ['Sex','Embarked','Pclass']
 # Remove first variable to prevent coliniearity
 train_df_onehot = pd.get_dummies(train_df, columns=cat_cols, drop_first=True)
+# Create feature and label data frames
 X = train_df_onehot.drop(columns=['Survived'])
 X_const = sm.add_constant(train_df_onehot.drop(columns=['Survived']))
 y = train_df_onehot['Survived']
 """
 Testing Assumptions
-    1. Check for independence of variables and log odds (Box - Tidwell)
+    1. Check for independence of variables and log odds for continous variables(Box - Tidwell)
     2. No influential outliers
 """
 # 1. Independece and Box tidwell test
 sns.heatmap(train_df_onehot.corr())
-# only works for positive values
+# remove non 0 values for continous variables to perform box-tidwell
 train_df_onehot = train_df_onehot.drop(train_df[train_df['Age'] == 0].index)
 train_df_onehot = train_df_onehot.drop(train_df[train_df['Fare'] == 0].index)
 # Define continous variables
@@ -160,7 +162,7 @@ plt.show()
 plt.scatter(x=X_const['Fare'].values, y = log_odds);
 plt.show()
 
-# 2. Influential outliers
+# 2. Check for influential outliers
 # logit model
 logit_model = GLM(y, X_const, family=families.Binomial())
 logit_results = logit_model.fit()
@@ -198,7 +200,7 @@ X.iloc[301]
 X.iloc[498]
 X.iloc[570]
 
-# Absence of multicollinearity
+# 3. Check for multicollinearity
 # check correlation matrix
 corrMatrix = X.corr()
 sns.heatmap(corrMatrix, annot=True, cmap="RdYlGn")
@@ -209,11 +211,11 @@ def calc_vif(df):
     vif["VIF"] = [variance_inflation_factor(df.values, i) for i in range(df.shape[1])]
     return(vif)
 calc_vif(X_const)
-# No significant multi colinearity. 
+# No significant multi colinearity.
 # Note if we did not drop first level for each dummy variable you would see multi colinearity
 
 
-# Indepednce of observations
+# 4. Indepednce of observations
 # fit model
 logit_model = GLM(y, X_const, family=families.Binomial())
 logit_results = logit_model.fit()
@@ -223,7 +225,6 @@ fig = plt.figure(figsize=(8,5))
 ax = fig.add_subplot(111, title="Residual Series Plot",
                     xlabel="Index Number", ylabel="Deviance Residuals")
 
-# ax.plot(X.index.tolist(), stats.zscore(logit_results.resid_pearson))
 ax.plot(X.index.tolist(), stats.zscore(logit_results.resid_deviance))
 plt.axhline(y=0, ls="--", color='red');
 # We are looking for absence of trend in the above plot. Enough to eye it.
@@ -242,10 +243,16 @@ plt.xlabel("Number of features selected")
 plt.ylabel("Cross validation score (nb of correct classifications)")
 plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
 plt.show()
-Selected_Features = ['Age', 'SibSp', 'Parch', 'Fare', 'Sex_male', 'Embarked_Q', 'Embarked_S', 'Pclass_2', 'Pclass_3']
+Selected_Features = ['Age', 'SibSp', 'Parch', 'Fare', 'Sex_male',
+                    'Embarked_Q', 'Embarked_S', 'Pclass_2', 'Pclass_3']
 """
 Model Fitting
     1. Split into train and validation
+    2. Create regression model with selected features
+    3. Assess model fit and model diagnositics
+    4. Calculate odds ratios
+    5. Create ROC curve
+    6. Perform cross validation
 """
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score 
@@ -282,7 +289,7 @@ for index, var in enumerate(X_train.columns):
     print(var + " : " + str(np.exp(model.coef_)[0][index]))
 
 # index of the first threshold for which the sensibility > 0.95
-idx = np.min(np.where(tpr > 0.95)) 
+idx = np.min(np.where(tpr > 0.95))
 
 # Plot ROC curve 
 plt.figure()
