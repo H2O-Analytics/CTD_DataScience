@@ -19,7 +19,7 @@ Resources Used:
         1. https://www.kaggle.com/competitions/titanic/data?select=train.csv
         2. https://github.com/kennethleungty/Logistic-Regression-Assumptions/blob/main/Logistic_Regression_Assumptions.ipynb
         3. https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8
-        
+        4. https://www.kaggle.com/code/mnassrib/titanic-logistic-regression-with-python/notebook
 History:
 Date        User    Ticket #    Description
 08SEP2022   TW      ITKTP-11    | Initial Developement
@@ -27,24 +27,18 @@ Date        User    Ticket #    Description
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 """
 # Import Packages
-from asyncio import threads
-from cmath import inf
-from distutils.log import Log
-from tkinter.font import families
 import pandas as pd
 import numpy as np
-import statsmodels.api as sm
-from statsmodels.genmod.generalized_linear_model import GLM
-from statsmodels.genmod import families
-from sklearn import preprocessing
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import RFECV
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import stats
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-from sklearn.feature_selection import RFECV
-
+from statsmodels.genmod import families
+import statsmodels.api as sm
+from statsmodels.genmod.generalized_linear_model import GLM
 
 # Input data sets
 DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
@@ -231,8 +225,13 @@ plt.axhline(y=0, ls="--", color='red');
 
 """
 Feature Selection
-    1. Advanced technique: recursive feature elimination
+    1. Create Fare^2 var
+    2. Advanced technique: recursive feature elimination
 """
+# Create Fare^2 and drop Fare based on linearity assumption
+#X['Fare^2'] = X['Fare'] * X['Fare']
+#X = X.drop(columns=['Fare'])
+# Recursive feature elimination
 rfecv = RFECV(estimator=LogisticRegression(max_iter=1000), step=1, cv=10, scoring='accuracy')
 rfecv.fit(X,y)
 print("Optimal number of features: %d" % rfecv.n_features_)
@@ -243,8 +242,7 @@ plt.xlabel("Number of features selected")
 plt.ylabel("Cross validation score (nb of correct classifications)")
 plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
 plt.show()
-Selected_Features = ['Age', 'SibSp', 'Parch', 'Fare', 'Sex_male',
-                    'Embarked_Q', 'Embarked_S', 'Pclass_2', 'Pclass_3']
+Selected_Features = list(X.columns[rfecv.support_])
 """
 Model Fitting
     1. Split into train and validation
