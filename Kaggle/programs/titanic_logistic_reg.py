@@ -115,6 +115,7 @@ y = train_df_onehot['Survived']
 Testing Assumptions
     1. Check for independence of variables and log odds for continous variables(Box - Tidwell)
     2. No influential outliers
+    3. 
 """
 # 1. Independece and Box tidwell test
 sns.heatmap(train_df_onehot.corr())
@@ -142,7 +143,7 @@ print(logit_results.summary())
     # Ho: non linear relationship between var*log(var)
     # Ha: linear relationship between var*log(var)
     # Log_Fare p value > .05 therefore Ho therefore linearity violated
-    # Lof_Age p value < .05 therefore Ha therefore linearity not violated
+    # Log_Age p value < .05 therefore Ha therefore linearity not violated
     # Solution is to apply Fare^2 interaction term
 # Visualization of Linearity
 logit_results2 = GLM(y, X_const, family=families.Binomial()).fit()
@@ -229,8 +230,8 @@ Feature Selection
     2. Advanced technique: recursive feature elimination
 """
 # Create Fare^2 and drop Fare based on linearity assumption
-#X['Fare^2'] = X['Fare'] * X['Fare']
-#X = X.drop(columns=['Fare'])
+X['Fare^2'] = X['Fare'] * X['Fare']
+X = X.drop(columns=['Fare'])
 # Recursive feature elimination
 rfecv = RFECV(estimator=LogisticRegression(max_iter=1000), step=1, cv=10, scoring='accuracy')
 rfecv.fit(X,y)
