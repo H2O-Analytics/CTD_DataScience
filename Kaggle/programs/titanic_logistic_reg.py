@@ -27,7 +27,8 @@ Date        User    Ticket #    Description
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 """
 # Import Packages
-from random_forest import *
+from functions.classification_models import *
+from functions.classification_scoring import *
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -228,7 +229,7 @@ ax = fig.add_subplot(111, title="Residual Series Plot",
                     xlabel="Index Number", ylabel="Deviance Residuals")
 
 ax.plot(X.index.tolist(), stats.zscore(logit_results.resid_deviance))
-plt.axhline(y=0, ls="--", color='red');
+plt.axhline(y=0, ls="--", color='red')
 # We are looking for absence of trend in the above plot. Enough to eye it.
 
 
@@ -266,19 +267,19 @@ Model Fitting
 # Split into train and val
 X = X[Selected_Features]
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=.20, random_state=42)
-# Random forest model
-rand_forest(n_estimators=1000, X_train=X_train, y_train=y_train, X_val=X_val, y_val=y_val, random_state=42)
 
-# check classification scores
-logreg = LogisticRegression(max_iter = 1000)
-model = logreg.fit(X_train, y_train)
-y_pred = logreg.predict(X_val)
-y_pred_prob = logreg.predict_proba(X_val)[:, 1]
-[fpr, tpr, thr] = roc_curve(y_val, y_pred_prob)
-print('Train/Test split results:')
-print(logreg.__class__.__name__+" accuracy is %2.3f" % accuracy_score(y_val, y_pred))
-print(logreg.__class__.__name__+" log_loss is %2.3f" % log_loss(y_val, y_pred_prob))
-print(logreg.__class__.__name__+" auc is %2.3f" % auc(fpr, tpr))
+# Random forest model
+rf_mod, rf_pred, rf_pred_prob = rand_forest(n_estimators=1000,
+                                            x_train=X_train,
+                                            y_train=y_train,
+                                            x_val=X_val,
+                                            random_state=42)
+
+# Log Reg Model
+log_mod, log_pred, log_pred_prob = log_reg( max_iter = 1000,
+                                            log_x_train=X_train,
+                                            log_y_train=y_train,
+                                            log_x_val=X_val)
 
 # assess model fit and model stats
 logit_model = sm.Logit(y_train, sm.add_constant(X_train))
@@ -296,26 +297,7 @@ np.exp(model.coef_)
 for index, var in enumerate(X_train.columns):
     print(var + " : " + str(np.exp(model.coef_)[0][index]))
 
-# index of the first threshold for which the sensibility > 0.95
-idx = np.min(np.where(tpr > 0.95))
 
-# Plot ROC curve
-plt.figure()
-plt.plot(fpr, tpr, color='coral', label='ROC curve (area = %0.3f)' % auc(fpr, tpr))
-plt.plot([0, 1], [0, 1], 'k--')
-plt.plot([0,fpr[idx]], [tpr[idx],tpr[idx]], 'k--', color='blue')
-plt.plot([fpr[idx],fpr[idx]], [0,tpr[idx]], 'k--', color='blue')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate (1 - specificity)', fontsize=14)
-plt.ylabel('True Positive Rate (recall)', fontsize=14)
-plt.title('Receiver operating characteristic (ROC) curve')
-plt.legend(loc="lower right")
-plt.show()
-
-print("Using a threshold of %.3f " % thr[idx] + "guarantees a sensitivity of %.3f " % tpr[idx] +  
-      "and a specificity of %.3f" % (1-fpr[idx]) + 
-      ", i.e. a false positive rate of %.2f%%." % (np.array(fpr[idx])*100))
 
 # 10-fold cross-validation logistic regression
 logreg = LogisticRegression(max_iter=1000)
