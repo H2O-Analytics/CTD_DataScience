@@ -27,11 +27,9 @@ Date        User    Ticket #    Description
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 """
 # Import Packages
+from functions.random_forest import rand_forest
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.feature_selection import RFECV
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -39,6 +37,11 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.genmod import families
 import statsmodels.api as sm
 from statsmodels.genmod.generalized_linear_model import GLM
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score 
+from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve, auc, log_loss
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.feature_selection import RFECV
 
 # Input data sets
 DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
@@ -111,12 +114,15 @@ train_df_onehot = pd.get_dummies(train_df, columns=cat_cols, drop_first=True)
 X = train_df_onehot.drop(columns=['Survived'])
 X_const = sm.add_constant(train_df_onehot.drop(columns=['Survived']))
 y = train_df_onehot['Survived']
+
 """
 Testing Assumptions
     1. Check for independence of variables and log odds for continous variables(Box - Tidwell)
-    2. No influential outliers
-    3. 
+    2. Check for influential outliers
+    3. Check for multicolinearity
+    4. Check for independence of observations
 """
+
 # 1. Independece and Box tidwell test
 sns.heatmap(train_df_onehot.corr())
 # remove non 0 values for continous variables to perform box-tidwell
@@ -224,6 +230,7 @@ ax.plot(X.index.tolist(), stats.zscore(logit_results.resid_deviance))
 plt.axhline(y=0, ls="--", color='red');
 # We are looking for absence of trend in the above plot. Enough to eye it.
 
+
 """
 Feature Selection
     1. Create Fare^2 var
@@ -244,6 +251,8 @@ plt.ylabel("Cross validation score (nb of correct classifications)")
 plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
 plt.show()
 Selected_Features = list(X.columns[rfecv.support_])
+
+
 """
 Model Fitting
     1. Split into train and validation
@@ -253,9 +262,6 @@ Model Fitting
     5. Create ROC curve
     6. Perform cross validation
 """
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score 
-from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve, auc, log_loss
 # Split into train and val
 X = X[Selected_Features]
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=.20, random_state=42)
@@ -290,7 +296,7 @@ for index, var in enumerate(X_train.columns):
 # index of the first threshold for which the sensibility > 0.95
 idx = np.min(np.where(tpr > 0.95))
 
-# Plot ROC curve 
+# Plot ROC curve
 plt.figure()
 plt.plot(fpr, tpr, color='coral', label='ROC curve (area = %0.3f)' % auc(fpr, tpr))
 plt.plot([0, 1], [0, 1], 'k--')
