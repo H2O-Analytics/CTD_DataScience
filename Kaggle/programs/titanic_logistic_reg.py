@@ -28,7 +28,7 @@ Date        User    Ticket #    Description
 """
 # Import Packages
 from functions.classification_models import *
-from functions.classification_scoring import *
+from functions.classification_scoring import gen_scoring
 import pandas as pd
 import numpy as np
 import seaborn as sns
