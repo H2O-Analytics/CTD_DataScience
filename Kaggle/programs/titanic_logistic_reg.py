@@ -28,7 +28,7 @@ Date        User    Ticket #    Description
 """
 # Import Packages
 from functions.classification_models import *
-from functions.classification_scoring import gen_scoring
+from functions.classification_scoring import *
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -44,6 +44,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.feature_selection import RFECV
+
+from programs.functions.classification_scoring import odds_ratio
 
 # Input data sets
 DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
@@ -274,6 +276,11 @@ rf_mod, rf_pred, rf_pred_prob = rand_forest(n_estimators=1000,
                                             y_train=y_train,
                                             x_val=X_val,
                                             random_state=42)
+# RF Scoring
+gen_scoring(model=rf_mod,
+            y_val=y_val,
+            pred=rf_pred,
+            pred_prob=rf_pred_prob)
 
 # Log Reg Model
 log_mod, log_pred, log_pred_prob = log_reg( max_iter = 1000,
@@ -287,6 +294,25 @@ gen_scoring(model=log_mod,
             pred=log_pred,
             pred_prob=log_pred_prob)
 
+
+# Odds ratio for log reg
+odds_ratio( model=log_mod,
+            x_train=X_train)
+
+# 10-fold cross-validation
+# Use cross_val_score function
+# We are passing the entirety of X and y, not X_train or y_train, it takes care of splitting the data
+# cv=10 for 10 folds
+# scoring = {'accuracy', 'neg_log_loss', 'roc_auc'} for evaluation metric - althought they are many
+scores_accuracy = cross_val_score(rf_mod, X, y, cv=10, scoring='accuracy')
+scores_log_loss = cross_val_score(rf_mod, X, y, cv=10, scoring='neg_log_loss')
+scores_auc = cross_val_score(rf_mod, X, y, cv=10, scoring='roc_auc')
+print('K-fold cross-validation results:')
+print(rf_mod.__class__.__name__+" average accuracy is %2.3f" % scores_accuracy.mean())
+print(rf_mod.__class__.__name__+" average log_loss is %2.3f" % -scores_log_loss.mean())
+print(rf_mod.__class__.__name__+" average auc is %2.3f" % scores_auc.mean())
+
+
 # assess model fit and model stats
 logit_model = sm.Logit(y_train, sm.add_constant(X_train))
 result = logit_model.fit()
@@ -294,26 +320,3 @@ stats1 = result.summary()
 stats2 = result.summary2()
 print(stats1)
 print(stats2)
-
-# calculate odds ratios
-model.get_params()
-model.intercept_
-model.classes_
-np.exp(model.coef_)
-for index, var in enumerate(X_train.columns):
-    print(var + " : " + str(np.exp(model.coef_)[0][index]))
-
-
-# 10-fold cross-validation logistic regression
-logreg = LogisticRegression(max_iter=1000)
-# Use cross_val_score function
-# We are passing the entirety of X and y, not X_train or y_train, it takes care of splitting the data
-# cv=10 for 10 folds
-# scoring = {'accuracy', 'neg_log_loss', 'roc_auc'} for evaluation metric - althought they are many
-scores_accuracy = cross_val_score(logreg, X, y, cv=10, scoring='accuracy')
-scores_log_loss = cross_val_score(logreg, X, y, cv=10, scoring='neg_log_loss')
-scores_auc = cross_val_score(logreg, X, y, cv=10, scoring='roc_auc')
-print('K-fold cross-validation results:')
-print(logreg.__class__.__name__+" average accuracy is %2.3f" % scores_accuracy.mean())
-print(logreg.__class__.__name__+" average log_loss is %2.3f" % -scores_log_loss.mean())
-print(logreg.__class__.__name__+" average auc is %2.3f" % scores_auc.mean())
