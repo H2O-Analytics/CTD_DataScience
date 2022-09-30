@@ -27,7 +27,7 @@ Date        User    Ticket #    Description
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 """
 # Import Packages
-from functions.random_forest import *
+from random_forest import *
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -40,6 +40,7 @@ from statsmodels.genmod.generalized_linear_model import GLM
 from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score 
 from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve, auc, log_loss
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.feature_selection import RFECV
 
@@ -265,6 +266,8 @@ Model Fitting
 # Split into train and val
 X = X[Selected_Features]
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=.20, random_state=42)
+# Random forest model
+rand_forest(n_estimators=1000, X_train=X_train, y_train=y_train, X_val=X_val, y_val=y_val, random_state=42)
 
 # check classification scores
 logreg = LogisticRegression(max_iter = 1000)
