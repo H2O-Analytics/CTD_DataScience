@@ -281,6 +281,12 @@ log_mod, log_pred, log_pred_prob = log_reg( max_iter = 1000,
                                             log_y_train=y_train,
                                             log_x_val=X_val)
 
+# Log Reg Scoring
+gen_scoring(model=log_mod,
+            y_val=y_val,
+            pred=log_pred,
+            pred_prob=log_pred_prob)
+
 # assess model fit and model stats
 logit_model = sm.Logit(y_train, sm.add_constant(X_train))
 result = logit_model.fit()
@@ -296,7 +302,6 @@ model.classes_
 np.exp(model.coef_)
 for index, var in enumerate(X_train.columns):
     print(var + " : " + str(np.exp(model.coef_)[0][index]))
-
 
 
 # 10-fold cross-validation logistic regression

@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def gen_scoring(model, y_val, pred, pred_prob):
+    '''Creates ROC Curve plot, accuracy measures, and confussion matrix plot'''
     [fpr, tpr, thr] = roc_curve(y_val, pred_prob)
     # check classification scores
     print('Train/Test split results:')
