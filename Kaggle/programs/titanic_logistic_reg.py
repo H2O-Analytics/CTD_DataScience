@@ -27,7 +27,7 @@ Date        User    Ticket #    Description
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 """
 # Import Packages
-from functions.random_forest import rand_forest
+from functions.random_forest import *
 import pandas as pd
 import numpy as np
 import seaborn as sns
