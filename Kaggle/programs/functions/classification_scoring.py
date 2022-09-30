@@ -80,3 +80,4 @@ def odds_ratio(model, x_train):
     np.exp(model.coef_)
     for index, var in enumerate(x_train.columns):
         print(var + " : " + str(np.exp(model.coef_)[0][index]))
+        

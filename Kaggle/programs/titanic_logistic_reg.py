@@ -25,6 +25,8 @@ Date        User    Ticket #    Description
 08SEP2022   TW      ITKTP-11    | Initial Developement
 09SEP2022   TW      ITKTP-11    | Included variable manipulation and dummy variable creation
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
+30SEP2022   TW      ITKTP-2     | Wrap redundant code into modeling and model scoring functions. See programs/fucntion/* for
+                                  details.
 """
 # Import Packages
 from functions.classification_models import *
@@ -38,14 +40,9 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.genmod import families
 import statsmodels.api as sm
 from statsmodels.genmod.generalized_linear_model import GLM
-from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score 
-from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve, auc, log_loss
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.feature_selection import RFECV
-
-from programs.functions.classification_scoring import odds_ratio
 
 # Input data sets
 DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
@@ -258,7 +255,7 @@ Selected_Features = list(X.columns[rfecv.support_])
 
 
 """
-Model Fitting
+Model Fitting and Scoring
     1. Split into train and validation
     2. Create regression model with selected features
     3. Assess model fit and model diagnositics
