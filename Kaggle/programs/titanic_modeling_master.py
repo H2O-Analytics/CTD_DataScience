@@ -29,6 +29,7 @@ Date        User    Ticket #    Description
                                   details.
 """
 # Import Packages
+from re import L
 from functions.classification_models import *
 from functions.classification_scoring import *
 import pandas as pd
@@ -95,6 +96,17 @@ train_df.SibSp.hist()
 train_df.Parch.hist()
 train_df.Fare.hist(bins = 50)
 
+
+professional_titles = ['Dr','Rev']
+military_titles = ['Col','Major','Capt']
+royalty_titles = ['Master','Sir','Lady','Mme','Don','Jonkheer','the Countess','Countess']
+
+# Title to Profession_Type mapping
+train_df['name_title'] = train_df.Name.apply(lambda x: x.split(',')[1].split('.')[0].strip())
+train_df['profession_type'] = train_df.name_title.apply(lambda x : 'professional' if x in professional_titles else
+                                                        ('military' if x in military_titles else
+                                                        ('royalty' if x in royalty_titles else
+                                                        'working')))
 """
 Variable Manipulation
     1. Impute median of age for missing age
@@ -103,12 +115,12 @@ Variable Manipulation
     4. Create dummy variables
 """
 train_df['Age'] = train_df['Age'].fillna(train_df['Age'].median(skipna=True))
-train_df = train_df.drop(columns=['Cabin', 'Name', 'Ticket', 'PassengerId'])
+train_df = train_df.drop(columns=['Cabin', 'Name', 'Ticket', 'PassengerId','name_title'])
 train_df['Embarked'] = train_df['Embarked'].fillna(train_df['Embarked'].mode()[0])
 print(train_df.isnull().sum()*100/len(train_df))
 
 # Create dummy variables
-cat_cols = ['Sex','Embarked','Pclass']
+cat_cols = ['Sex','Embarked','Pclass','profession_type']
 # Remove first variable to prevent coliniearity
 train_df_onehot = pd.get_dummies(train_df, columns=cat_cols, drop_first=True)
 # Create feature and label data frames
