@@ -268,11 +268,11 @@ X = X[Selected_Features]
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=.20, random_state=42)
 
 # Random forest model
-rf_mod, rf_pred, rf_pred_prob = rand_forest(n_estimators=1000,
-                                            x_train=X_train,
-                                            y_train=y_train,
-                                            x_val=X_val,
-                                            random_state=42)
+rf_mod, rf_pred, rf_pred_prob, rf_importance  = rand_forest(n_estimators=1000,
+                                                    x_train=X_train,
+                                                    y_train=y_train,
+                                                    x_val=X_val,
+                                                    random_state=42)
 # RF Scoring
 gen_scoring(model=rf_mod,
             y_val=y_val,

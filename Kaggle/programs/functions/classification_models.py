@@ -33,7 +33,8 @@ def rand_forest(n_estimators, random_state, x_train, y_train, x_val):
     rf_model.fit(x_train, y_train)
     rf_pred = rf_model.predict(x_val)
     rf_pred_prob = rf_model.predict_proba(x_val)[:,1]
-    return rf_model, rf_pred, rf_pred_prob
+    rf_importance = rf_model.feature_importances_
+    return rf_model, rf_pred, rf_pred_prob, rf_importance
 
 
 def log_reg(max_iter, log_x_train, log_y_train, log_x_val):
@@ -43,3 +44,4 @@ def log_reg(max_iter, log_x_train, log_y_train, log_x_val):
     log_pred = log_model.predict(log_x_val)
     log_pred_prob = log_model.predict_proba(log_x_val)[:, 1]
     return log_model, log_pred, log_pred_prob
+    
