@@ -27,9 +27,12 @@ Date        User    Ticket #    Description
 26SEP2022   TW      ITKTP-11    | Test log reg assumptions. Do recursive feature selection. Fit final model.
 30SEP2022   TW      ITKTP-2     | Wrap redundant code into modeling and model scoring functions. See programs/fucntion/* for
                                   details.
+05OCT2022   TW/JT   ITKTP-30    | Included profession type using name titles
 """
 # Import Packages
 from re import L
+
+from pytest import param
 from functions.classification_models import *
 from functions.classification_scoring import *
 import pandas as pd
@@ -42,8 +45,10 @@ from statsmodels.genmod import families
 import statsmodels.api as sm
 from statsmodels.genmod.generalized_linear_model import GLM
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, train_test_split, cross_val_score
 from sklearn.feature_selection import RFECV
+from hyperopt import hp
+import xgboost as xgb
 
 # Input data sets
 DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
@@ -97,6 +102,14 @@ train_df.Parch.hist()
 train_df.Fare.hist(bins = 50)
 
 
+"""
+Variable Manipulation
+    1. Variable imputation
+    2. Drop trouble variables
+    3. Feaure engineering
+    4. Create dummy variables
+"""
+# List of titles by type
 professional_titles = ['Dr','Rev']
 military_titles = ['Col','Major','Capt']
 royalty_titles = ['Master','Sir','Lady','Mme','Don','Jonkheer','the Countess','Countess']
@@ -107,13 +120,6 @@ train_df['profession_type'] = train_df.name_title.apply(lambda x : 'professional
                                                         ('military' if x in military_titles else
                                                         ('royalty' if x in royalty_titles else
                                                         'working')))
-"""
-Variable Manipulation
-    1. Impute median of age for missing age
-    2. Remove Cabin, too many missing values. Remove name (does't matter and too sparse)
-    3. Impute mode of Embarked for missing Embarked
-    4. Create dummy variables
-"""
 train_df['Age'] = train_df['Age'].fillna(train_df['Age'].median(skipna=True))
 train_df = train_df.drop(columns=['Cabin', 'Name', 'Ticket', 'PassengerId','name_title'])
 train_df['Embarked'] = train_df['Embarked'].fillna(train_df['Embarked'].mode()[0])
@@ -231,6 +237,7 @@ calc_vif(X_const)
 
 # 4. Indepednce of observations
 # fit model
+# We are looking for absence of trend in the below plot. Enough to eye it.
 logit_model = GLM(y, X_const, family=families.Binomial())
 logit_results = logit_model.fit()
 print(logit_results.summary())
@@ -241,8 +248,6 @@ ax = fig.add_subplot(111, title="Residual Series Plot",
 
 ax.plot(X.index.tolist(), stats.zscore(logit_results.resid_deviance))
 plt.axhline(y=0, ls="--", color='red')
-# We are looking for absence of trend in the above plot. Enough to eye it.
-
 
 """
 Feature Selection
@@ -277,19 +282,98 @@ Model Fitting and Scoring
 """
 # Split into train and val
 X = X[Selected_Features]
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=.20, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=.20, random_state=None)
+
+# XBG model with Random Search hyper parameter tuning
+xgb_model = xgb.XGBClassifier(  objective='binary:logistic',
+                                booster='gbtree',
+                                eval_metric='auc',
+                                tree_method='hist',
+                                grow_policy='lossguide',
+                                use_label_encoder=False)
+xgb_model = xgb.XGBClassifier()
+
+xgb_model.fit(X_train, y_train)
+xgb_model.get_params()
+
+# Define the search space (testing using hyperopt, needs more workhttps://www.kaggle.com/code/prashant111/a-guide-on-xgboost-hyperparameters-tuning/notebook)
+"""
+param_grid={'max_depth': hp.quniform("max_depth", 3, 18, 1),
+        'gamma': hp.uniform ('gamma', 1,9),
+        'reg_alpha' : hp.quniform('reg_alpha', 40,180,1),
+        'reg_lambda' : hp.uniform('reg_lambda', 0,1),
+        'colsample_bytree' : hp.uniform('colsample_bytree', 0.5,1),
+        'min_child_weight' : hp.quniform('min_child_weight', 0, 10, 1),
+        'n_estimators': hp.quniform("n_estimators",10,200,10),
+        'seed': 0}
+"""
+# Define the search space
+param_grid = {'gamma': [0,0.1,0.2,0.4,0.8,1.6,3.2,6.4,12.8,25.6,51.2,102.4, 200],
+              'learning_rate': [0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 0.25, 0.300000012, 0.4, 0.5, 0.6, 0.7],
+              'max_depth': [5,6,7,8,9,10,11,12,13,14],
+              'n_estimators': [50,65,80,100,115,130,150],
+              'reg_alpha': [0,0.1,0.2,0.4,0.8,1.6,3.2,6.4,12.8,25.6,51.2,102.4,200],
+              'reg_lambda': [0,0.1,0.2,0.4,0.8,1.6,3.2,6.4,12.8,25.6,51.2,102.4,200]}
+# Define the scoring metric to optimize
+scoring = ['accuracy']
+
+# K-fold cross validation
+kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=None)
+
+random_search = RandomizedSearchCV( estimator=xgb_model,
+                                    param_distributions=param_grid,
+                                    n_iter = 48,
+                                    scoring=scoring,
+                                    refit='accuracy',
+                                    n_jobs=-1,
+                                    cv=kfold,
+                                    verbose=0)
+
+random_result = random_search.fit(X_train, y_train)
+# Print the best score and the corresponding hyperparameters
+print(f'The best score is {random_result.best_score_:.4f}')
+print('The best score standard deviation is', round(random_result.cv_results_['std_test_accuracy'][random_result.best_index_], 4))
+print(f'The best hyperparameters are {random_result.best_params_}')
+# Apply hyper parameters to XGBoost
+xgb_mod = xgb.XGBClassifier(objective='binary:logistic',
+                            booster='gbtree',
+                            eval_metric='auc',
+                            tree_method='hist',
+                            grow_policy='lossguide',
+                            use_label_encoder=False,
+                            reg_lambda = 3.2,
+                            reg_alpha = .4,
+                            n_estimators = 80,
+                            max_depth = 14,
+                            learning_rate = .25,
+                            gamma = .8)
+xgb_mod.fit(X_train, y_train)
+xgb_pred = xgb_mod.predict(X_val)
+xgb_pred_prob = xgb_mod.predict_proba(X_val)[:,1]
+
+# XGB Scoring
+gen_scoring(model=xgb_mod,
+            y_val=y_val,
+            pred=xgb_pred,
+            pred_prob=xgb_pred_prob)
 
 # Random forest model
 rf_mod, rf_pred, rf_pred_prob, rf_importance  = rand_forest(n_estimators=1000,
                                                     x_train=X_train,
                                                     y_train=y_train,
                                                     x_val=X_val,
-                                                    random_state=42)
+                                                    random_state=None)
 # RF Scoring
 gen_scoring(model=rf_mod,
             y_val=y_val,
             pred=rf_pred,
             pred_prob=rf_pred_prob)
+
+# Log reg cross validation scoring
+cv_scoring( mod=rf_mod,
+            X=X,
+            y=y,
+            cv=10)
 
 # Log Reg Model
 log_mod, log_pred, log_pred_prob = log_reg( max_iter = 1000,
@@ -308,24 +392,15 @@ gen_scoring(model=log_mod,
 odds_ratio( model=log_mod,
             x_train=X_train)
 
-# 10-fold cross-validation
-# Use cross_val_score function
-# We are passing the entirety of X and y, not X_train or y_train, it takes care of splitting the data
-# cv=10 for 10 folds
-# scoring = {'accuracy', 'neg_log_loss', 'roc_auc'} for evaluation metric - althought they are many
-scores_accuracy = cross_val_score(rf_mod, X, y, cv=10, scoring='accuracy')
-scores_log_loss = cross_val_score(rf_mod, X, y, cv=10, scoring='neg_log_loss')
-scores_auc = cross_val_score(rf_mod, X, y, cv=10, scoring='roc_auc')
-print('K-fold cross-validation results:')
-print(rf_mod.__class__.__name__+" average accuracy is %2.3f" % scores_accuracy.mean())
-print(rf_mod.__class__.__name__+" average log_loss is %2.3f" % -scores_log_loss.mean())
-print(rf_mod.__class__.__name__+" average auc is %2.3f" % scores_auc.mean())
+# Log reg cross validation scoring
+cv_scoring( mod=log_mod,
+            X=X,
+            y=y,
+            cv=10)
 
+"""
+Precision: TP/(TP+FP) determines the accuracy of positive predictions
+Recall: TP/(TP+FN) determines the fraction of positives that were correctly identified
+F1 Score: is a mean of precision and recall. Best F1 = 1, worst = 0    
 
-# assess model fit and model stats
-logit_model = sm.Logit(y_train, sm.add_constant(X_train))
-result = logit_model.fit()
-stats1 = result.summary()
-stats2 = result.summary2()
-print(stats1)
-print(stats2)
+"""

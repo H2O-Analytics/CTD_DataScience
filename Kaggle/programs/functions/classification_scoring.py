@@ -23,6 +23,7 @@ Date        User    Ticket #    Description
 """
 from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score 
 from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve, auc, log_loss
+from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -69,6 +70,29 @@ def gen_scoring(model, y_val, pred, pred_prob):
     print("Using a threshold of %.3f " % thr[idx] + "guarantees a sensitivity of %.3f " % tpr[idx] +  
         "and a specificity of %.3f" % (1-fpr[idx]) + 
         ", i.e. a false positive rate of %.2f%%." % (np.array(fpr[idx])*100))
+
+
+def cv_scoring(mod, X, y, cv):
+    '''
+    Inputs:
+        mod = model objet
+        X = features
+        y = labels
+        cv = number of cross validations
+    Outputs: 
+        {'accuracy', 'neg_log_loss', 'roc_auc'} for evaluation metric - althought they are many
+    Notes:
+        1. Uses cross_val_score function
+        2. We are passing the entirety of X and y, not X_train or y_train, it takes care of splitting the data
+    '''
+    scores_accuracy = cross_val_score(mod, X, y, cv=cv, scoring='accuracy')
+    scores_log_loss = cross_val_score(mod, X, y, cv=cv, scoring='neg_log_loss')
+    scores_auc = cross_val_score(mod, X, y, cv=cv, scoring='roc_auc')
+    print('K-fold cross-validation results:')
+    print('Number for cross-validations: ' + str(cv))
+    print(mod.__class__.__name__+" average accuracy is %2.3f" % scores_accuracy.mean())
+    print(mod.__class__.__name__+" average log_loss is %2.3f" % -scores_log_loss.mean())
+    print(mod.__class__.__name__+" average auc is %2.3f" % scores_auc.mean())
 
 
 def odds_ratio(model, x_train):
