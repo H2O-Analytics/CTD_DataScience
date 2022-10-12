@@ -327,6 +327,7 @@ random_result = random_search.fit(X_train, y_train)
 print(f'The best score is {random_result.best_score_:.4f}')
 print('The best score standard deviation is', round(random_result.cv_results_['std_test_accuracy'][random_result.best_index_], 4))
 print(f'The best hyperparameters are {random_result.best_params_}')
+
 # Apply hyper parameters to XGBoost
 xgb_mod = xgb.XGBClassifier(objective='binary:logistic',
                             booster='gbtree',
@@ -390,6 +391,17 @@ cv_scoring( mod=log_mod,
             X=X,
             y=y,
             cv=10)
+
+
+" SVM Model"
+svm_model = svm.classifier()
+svm_predict = svm_model.pred
+svm_predict_prob = svm_model.pred_prob
+
+gen_scoring(model = svm_model,
+y_val=y_val,
+pred= svm_pred,
+pred_prob = svm_pred_prob)
 
 """
 Precision: TP/(TP+FP) determines the accuracy of positive predictions
