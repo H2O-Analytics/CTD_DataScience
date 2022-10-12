@@ -1,24 +1,16 @@
 """
 Name: classification_models.py
-
 Purpose: Creates classification model results
-
 Developer: Taylor Waters
-
 Input:  X_train - training feature data
         y_train - training target data
         max iter
         n_estimator
         x_val
-
 Output
-
 Parameters:
-
 Usage:
-
 Resources Used:
-
 History:
 Date        User    Ticket #    Description
 30SEP2022   tawate  ITKTP-22    Initial funciton development

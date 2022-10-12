@@ -1,20 +1,13 @@
 """
 Name: titanic_logistic_reg.py
-
 Purpose: Create end to end logistic regression to predict the suvival of a passenger on the titanic
-
 Developer: Taylor Waters
-
 Input:  train.csv:  titanic survival training set
         test.csv:   titanc survival test set without predictor var
-
 Output
-
 Parameters:
         DATA_PATH_TW:   path for TW google drive with kaggle titanic datasets
-
 Usage:
-
 Resources Used:
         1. https://www.kaggle.com/competitions/titanic/data?select=train.csv
         2. https://github.com/kennethleungty/Logistic-Regression-Assumptions/blob/main/Logistic_Regression_Assumptions.ipynb

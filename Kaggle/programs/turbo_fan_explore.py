@@ -1,21 +1,12 @@
 """
 Name: 
-
 Purpose: 
-
 Developer: Taylor Waters
-
 Input:  
-
 Output
-
 Parameters:
-
-
 Usage:
-
 Resources Used:
-
 History:
 Date        User    Ticket #    Description
 """
@@ -80,6 +71,12 @@ cycles_to_failure = train_fd001.groupby(['unit_num']).size().reset_index(name='c
 cycles_to_failure['cycles'].hist()
 
 uni_1 = train_fd001[train_fd001['unit_num'] == 1]
+sns.set()
+fig,axes = plt.subplots(3,1)
+
+sns.lineplot(data = uni_1, x="time(cycles)", y = "op_1", ax = axes[0])
+sns.lineplot(data = uni_1, x="time(cycles)", y = "meas_1", ax = axes[1])
+sns.lineplot(data = uni_1, x="time(cycles)", y = "meas_2", ax = axes[2])
 
 for index,var in enumerate(uni_1):
         if index >= 4 and 'meas' in var:
@@ -91,15 +88,8 @@ for index,var in enumerate(uni_1):
 sns.lineplot(data=uni_1, x="time(cycles)", y = "op_1", color="g")
 ax2 = plt.twinx()
 sns.lineplot(data=uni_1, x="time(cycles)", y = "meas_2", color="b", ax=ax2).set(title = '')
-sns.set()
-fig,axes = plt.subplots(3,1)
 
-sns.lineplot(data = uni_1, x="time(cycles)", y = "op_1", ax = axes[0])
-sns.lineplot(data = uni_1, x="time(cycles)", y = "meas_1", ax = axes[1])
-sns.lineplot(data = uni_1, x="time(cycles)", y = "meas_2", ax = axes[2])
 # Next Steps:
 #       Normalize all data and plot operational settins vs measures
 #       Smooth all curves to reduce sensor noise
 #       Determine relationships between each measure and operatioal setting
-#       Determine sensors that don't change during by cycle and remove
-#       Plot all sensors in a large supbplot by operational setting

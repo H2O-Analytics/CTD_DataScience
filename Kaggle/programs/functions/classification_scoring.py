@@ -1,22 +1,14 @@
 """
 Name: random_forest_class.py
-
 Purpose: Scores different classification models
-
 Developer: Taylor Waters
-
 Fucntions:
         gen_scoring: produces general classification scoring metrics
         odds_ratio: outputs odds ratios for each feature in a logistic regression
-
 Output
-
 Parameters:
-
 Usage:
-
 Resources Used:
-
 History:
 Date        User    Ticket #    Description
 30SEP2022   tawate  ITKTP-22    Initial funciton development
@@ -104,7 +96,3 @@ def odds_ratio(model, x_train):
     np.exp(model.coef_)
     for index, var in enumerate(x_train.columns):
         print(var + " : " + str(np.exp(model.coef_)[0][index]))
-
-
-
-        
