@@ -40,11 +40,9 @@ from statsmodels.genmod.generalized_linear_model import GLM
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, train_test_split, cross_val_score
 from sklearn.feature_selection import RFECV
-from hyperopt import hp
-import xgboost as xgb
 
 # Input data sets
-DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/Kaggle/Titanic/"
+DATA_PATH = "/Users/drewmaclennan/Library/CloudStorage/GoogleDrive-dmaclennan7@gmail.com/.shortcut-targets-by-id/1zYOUecIzsLDVZFqSsvw6zZiBkCJY67pY/CDT_Data_Science/data_sets/Kaggle/Titanic/"
 train_df = pd.read_csv(DATA_PATH + "train.csv")
 test_df = pd.read_csv(DATA_PATH + "test.csv")
 
