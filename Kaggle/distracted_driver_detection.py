@@ -262,7 +262,29 @@ for class_name in train_df['classname'].unique():
     hsv_images(class_name)
 
 """ Corner detection
-    look up goodFeaturesToTrack function methodology
+    goodFeaturesToTrack: https://www.geeksforgeeks.org/python-corner-detection-with-shi-tomasi-corner-detection-method-using-opencv/
+        - looks for significant change (max gradient) in all directions
+        - must be a gray scale image
+        - steps:
+            - finds the corner quality measure at every pixel using cornerMinEigenVal()
+            - performs non-maximum suppression (see below)
+            - corners with min eigenvalue < qualityLevel  * max_qualityMeasureMap(x,y) are rejected
+            - remaining corners are sorted by quality measure in descending order
+            - remove each corner for which there is a stronger corner at a distance > minDistance (euclidean distance)
+        - cornerMinEigenVal()
+            - same as corner_EigenValsAndVecs, but only stores the minimal eigenvalue. min(eigen_1, eigen_2)
+            - since algorithm is scanning entire image window for largest pixel intensity gradients, this can be a computationally heavy process
+            - above function uses taylor expansion to simplify scoring function R = min(eigen_val_1, eigen_val_2)
+        - cornerEigenValsAndVecs()
+            - every pixel consider a block size x block size  neighborhood (S_p)
+            - calculate covariation matrix of derivatives of pixel block itensity 
+                - M = [ sum((DI/Dx))^2 , sum(DI/Dx*DI/Dy)  
+                        sum(DI/Dx*DI/Dy), sum((DI/Dy)^2)]
+                - output is stored as (eigen_1, eigen_2, x1, y1, x2, y2)
+                    - eigen_1 and eigen_2 = eigenvalues of M
+                    - (x1, y1) = eigenvectors of eigen_1
+                    - (x2, y2) = eigenvectors of eigen_2
+
 """
 def corner_images_gray(class_name):
     classes_df = train_df[train_df['classname'] == class_name].reset_index(drop = True)
@@ -283,8 +305,8 @@ def corner_images_gray(class_name):
 for class_name in train_df['classname'].unique():
     corner_images_gray(class_name)
 
-""" Sift Featurs
-
+""" Sift Features
+    Look into the functionality of SIFT features
 """
 def sift_images_gray(class_name):
     classes_df = train_df[train_df['classname'] == class_name].reset_index(drop = True)
@@ -299,3 +321,7 @@ def sift_images_gray(class_name):
         plt.subplot(2,2,1)
         plt.imshow(kp_img, cmap="viridis")
         plt.show()
+
+for class_name in train_df['classname'].unique():
+    sift_images_gray(class_name)
+
