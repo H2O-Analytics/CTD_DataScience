@@ -262,8 +262,11 @@ for class_name in train_df['classname'].unique():
     hsv_images(class_name)
 
 """ Corner detection
-    goodFeaturesToTrack: https://www.geeksforgeeks.org/python-corner-detection-with-shi-tomasi-corner-detection-method-using-opencv/
+    - really good example of corner detection broken down https://sbme-tutorials.github.io/2018/cv/notes/6_week6.html#:~:text=Corner%20Detector%20using%20eigen%20values,-Getting%20the%20two&text=If%20both%20values%20are%20small,so%20we%20have%20a%20corner.
+    - goodFeaturesToTrack: https://www.geeksforgeeks.org/python-corner-detection-with-shi-tomasi-corner-detection-method-using-opencv/
         - looks for significant change (max gradient) in all directions
+        - edges appear where one eigen value is much greater than the other
+        - corners appear where both eigen values are large and relatively similar to eachother
         - must be a gray scale image
         - steps:
             - finds the corner quality measure at every pixel using cornerMinEigenVal()
@@ -284,6 +287,7 @@ for class_name in train_df['classname'].unique():
                     - eigen_1 and eigen_2 = eigenvalues of M
                     - (x1, y1) = eigenvectors of eigen_1
                     - (x2, y2) = eigenvectors of eigen_2
+        - need to review Eigenvalue, eigenvectors, sobel operators, and covariance matricies
 
 """
 def corner_images_gray(class_name):
