@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
@@ -18,29 +18,29 @@ from skimage import color
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-from keras import layers
-import keras.backend as K
-from keras.models import Sequential, Model
-from keras.preprocessing import image
-from keras.layers import Input, Dense, Activation, Dropout
-from keras.layers import Flatten, BatchNormalization
-from keras.layers import Convolution2D, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D 
-from keras.applications.imagenet_utils import preprocess_input
-from xgboost import train
-from tensorflow.keras.applications.vgg19 import VGG19
-from tensorflow.keras.applications import ResNet50
-from tf_explain.core.activations import ExtractActivations
-from tf_explain.core.grad_cam import GradCAM
-from sklearn.model_selection import train_test_split
-from keras.utils.data_utils import get_file
+# from keras import layers
+# import keras.backend as K
+# from keras.models import Sequential, Model
+# from keras.preprocessing import image
+# from keras.layers import Input, Dense, Activation, Dropout
+# from keras.layers import Flatten, BatchNormalization
+# from keras.layers import Convolution2D, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D 
+# from keras.applications.imagenet_utils import preprocess_input
+# from xgboost import train
+# from tensorflow.keras.applications.vgg19 import VGG19
+# from tensorflow.keras.applications import ResNet50
+# from tf_explain.core.activations import ExtractActivations
+# from tf_explain.core.grad_cam import GradCAM
+# from sklearn.model_selection import train_test_split
+# from keras.utils.data_utils import get_file
 
 from PIL import Image
 from tqdm import tqdm #shows a progress meter on looping structures
 import random as rnd
 import cv2
-from keras.preprocessing.image import ImageDataGenerator
-from numpy import expand_dims
-from livelossplot import PlotLossesKeras
+# from keras.preprocessing.image import ImageDataGenerator
+# from numpy import expand_dims
+# from livelossplot import PlotLossesKeras
 
 # load data
 path = '/Users/tawate/Library/CloudStorage/OneDrive-SAS/08_CDT_DataScience/state-farm-distracted-driver-detection'
@@ -288,7 +288,6 @@ for class_name in train_df['classname'].unique():
                     - (x1, y1) = eigenvectors of eigen_1
                     - (x2, y2) = eigenvectors of eigen_2
         - need to review Eigenvalue, eigenvectors, sobel operators, and covariance matricies
-
 """
 def corner_images_gray(class_name):
     classes_df = train_df[train_df['classname'] == class_name].reset_index(drop = True)
@@ -328,4 +327,3 @@ def sift_images_gray(class_name):
 
 for class_name in train_df['classname'].unique():
     sift_images_gray(class_name)
-
