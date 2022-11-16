@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 import numpy as np
-# import tensorflow as tf
+import tensorflow as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
@@ -38,7 +38,7 @@ from PIL import Image
 from tqdm import tqdm #shows a progress meter on looping structures
 import random as rnd
 import cv2
-# from keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 # from numpy import expand_dims
 # from livelossplot import PlotLossesKeras
 
@@ -308,8 +308,29 @@ def corner_images_gray(class_name):
 for class_name in train_df['classname'].unique():
     corner_images_gray(class_name)
 
-""" Sift Features
-    Look into the functionality of SIFT features
+""" Sift Features (https://docs.opencv.org/4.x/da/df5/tutorial_py_sift_intro.html)
+    Scale Invariant Feature Transform (SIFT): meaning no matter how you scale (larger or smaller) you will still be able to detect 
+    the desired features (i.e. edges, corners, etc.)
+    4 Steps:
+        1. Scale-space Extrema Detection
+            - Laplacian of Gaussian is found (sigma), see below description. This works as a blob detector, detecting blobs in various
+            sizes due to changes in sigma (scalling parameter). Therefore gaussian kenerl yielding low signma means gives high value
+            for small corner, and vice versa for a larger corner. (x,y,sigma) means there is a potenial key point at (x,y) at sigma scale.
+            - LoG is computationally intensive so DoG (difference of gaussian) is used. Obtained as the diff of gaussian blurring of an image,
+            with two different sigmas. This is done at diff octaves of an image in a Gaussian Pyramid. 
+            - Once DoG is found, local extrema are found over both scale and space. one pixel is compared with its 8 neighbors on same scale, 
+            9 neighbors in next scale, and 9 neighbors in the previous scale. It it is a local extrema, you have a potential key point.
+            - optiamtal values from above paper (number of octaves = 4, # of scale levels = 5, initial sigmae = 1.5 k = sqrt(2))
+        2. Keypoint Localization:
+            - potential keypoints from 1 are taylor expanded in scale space to get more accurate location of extrema. If itensity of pixel
+            at extrema doesn't meet a threshold, location of keypoint is rejected.
+            - DoG has a higher response for edges, therefore edges need to be removed in the process. OpenCV handles this through an edgeThreshold
+            option.
+        3. Orientation Assignment:
+            - Circles are generated on the image. Radius represents gradient magnitude, and the line(s), represent
+            the highest peak of the gradient histogram in 360 direction around the keypoint.
+        4. Keypoint Descriptor
+
 """
 def sift_images_gray(class_name):
     classes_df = train_df[train_df['classname'] == class_name].reset_index(drop = True)
@@ -327,3 +348,82 @@ def sift_images_gray(class_name):
 
 for class_name in train_df['classname'].unique():
     sift_images_gray(class_name)
+
+
+""" Plot Augmentations
+"""
+def plot_aug(paths, datagen):
+    plt.figure(figsize=(14,28))
+    plt.suptitle('Augmented Images')
+
+    midx = 0
+    for path in paths:
+        data = Image.open(path)
+        data = data.resize((224,224))
+        samples = expand_dims(data, 0)
+        it = datagen.flow(samples, batch_size=1)
+
+        # Show original image
+        plt.subplot(10,5, midx+1)
+        plt.imshow(data)
+        plt.axis('off')
+
+        # Show augmented image
+        for idx, i in enumerate(range(4)):
+            midx +=1
+            plt.subplot(10,5, midx+1)
+            batch = it.next()
+            image = batch[0].astype('uint8')
+            plt.imshow(image)
+            plt.axis('off')
+        
+        midx += 1
+    
+    plt.tight_layout()
+    plt.show()
+
+datagen = ImageDataGenerator(
+    rotation_range=20,
+    zoom_range=0.10,
+    brightness_range=[0.6,1.4],
+    channel_shift_range=0.7,
+    width_shift_range=0.15,
+    height_shift_range=0.15,
+    shear_range=0.15,
+    horizontal_flip=True,
+    fill_mode='nearest'
+)
+
+plot_aug(np.random.choice(train_df['path'],10), datagen)
+
+
+""" Modeling
+1. VGG19
+2. RESNET50
+3. Customer Model
+"""
+y_count = len(train_df['classname'].unique())
+
+# VGG19
+vgg19 = VGG19(include_tope = False, input_shape = (560,560,3), weights = 'imagenet')
+
+# training for all convolution is set to false
+for layer in vgg19.layers:
+    layer.trainable = False
+
+x = GlobalAveragePooling2D()(vgg19.output)
+predictions = Dense(y_count, activation='softmax')(x)
+
+model_vgg19 = Model(inputs = vgg9.input, outputs = predictions)
+
+# RESNET50
+resNET50 = ResNet50(include_top = False, input_shape = (560,560,3), weights = 'imagenet')
+
+# training of all convolutions is set to false
+for layer in resNET50.layers:
+    layer.trainable = False
+
+x = GlobalAveragePooling2D()(resNet50.output)
+predictions = Dense(y_count, activation='softmax')(x)
+
+model_resNet50 = Model(inputs = resNet50.input, outputs = predictions)
