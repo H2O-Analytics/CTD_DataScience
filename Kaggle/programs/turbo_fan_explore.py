@@ -21,7 +21,8 @@ import seaborn as sns
 sns.set_style("whitegrid")
 
 # import data
-DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/turbofan_sensors/"
+# DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/turbofan_sensors/"
+DATA_PATH = "/Users/tawate/Library/CloudStorage/OneDrive-SAS/08_CDT_DataScience/nasa engine turbofan data/turbofan_sensors/"
 # FD001 Settings:
 #       Fault Mode = High Pressure Compressor Degradation
 #       Conditions = 1. tested at sea level

@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
@@ -38,7 +38,7 @@ from PIL import Image
 from tqdm import tqdm #shows a progress meter on looping structures
 import random as rnd
 import cv2
-from keras.preprocessing.image import ImageDataGenerator
+# from keras.preprocessing.image import ImageDataGenerator
 # from numpy import expand_dims
 # from livelossplot import PlotLossesKeras
 
