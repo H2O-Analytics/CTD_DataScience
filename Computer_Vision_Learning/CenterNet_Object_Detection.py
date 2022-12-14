@@ -12,6 +12,8 @@ print(f"TensorFlow has access to the following devices:\n{tf.config.list_physica
 # See TensorFlow version
 print(f"TensorFlow version: {tf.__version__}")
 
+# Code location: https://learnopencv.com/centernet-anchor-free-object-detection-explained/
+
 models = {
           'Resnet101':'https://tfhub.dev/tensorflow/centernet/resnet101v1_fpn_512x512/1',   
           'HourGlass104':'https://tfhub.dev/tensorflow/centernet/hourglass_512x512/1'
