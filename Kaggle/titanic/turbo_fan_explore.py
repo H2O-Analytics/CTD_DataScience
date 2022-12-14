@@ -1,6 +1,6 @@
 """
 Name: 
-Purpose: 
+Purpose: exploratory analysis on nasa turbo fan sensor data
 Developer: Taylor Waters
 Input:  
 Output
@@ -18,10 +18,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
 sns.set_style("whitegrid")
 
 # import data
-DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/turbofan_sensors/"
+# DATA_PATH = "/Users/tawate/My Drive/CDT_Data_Science/data_sets/turbofan_sensors/"
+DATA_PATH = "/Users/tawate/Library/CloudStorage/OneDrive-SAS/08_CDT_DataScience/nasa engine turbofan data/turbofan_sensors/"
 # FD001 Settings:
 #       Fault Mode = High Pressure Compressor Degradation
 #       Conditions = 1. tested at sea level
@@ -73,23 +75,25 @@ cycles_to_failure['cycles'].hist()
 uni_1 = train_fd001[train_fd001['unit_num'] == 1]
 sns.set()
 fig,axes = plt.subplots(3,1)
-
+from scipy.signal import savgol_filter
 sns.lineplot(data = uni_1, x="time(cycles)", y = "op_1", ax = axes[0])
 sns.lineplot(data = uni_1, x="time(cycles)", y = "meas_1", ax = axes[1])
 sns.lineplot(data = uni_1, x="time(cycles)", y = "meas_2", ax = axes[2])
-
+y_smooth = np.convolve(y, box, mode='same')
 for index,var in enumerate(uni_1):
         if index >= 4 and 'meas' in var:
                 plt.figure()
-                sns.lineplot(data=uni_1, x="time(cycles)", y="op_1", color="g")
+                sns.lineplot(data=uni_1, x="time(cycles)", y=savgol_filter(uni_1["op_1"],51,3), color="g")
+                # ax2 = plt.twinx()
+                # sns.lineplot(data=uni_1, x="time(cycles)", y=var, color = "b", ax=ax2)
                 ax2 = plt.twinx()
-                sns.lineplot(data=uni_1, x="time(cycles)", y=var, color = "b", ax=ax2)
+                sns.lineplot(data=uni_1, x="time(cycles)", y=savgol_filter(uni_1[var],51,3), color = "b", ax=ax2)
 
 sns.lineplot(data=uni_1, x="time(cycles)", y = "op_1", color="g")
 ax2 = plt.twinx()
 sns.lineplot(data=uni_1, x="time(cycles)", y = "meas_2", color="b", ax=ax2).set(title = '')
 
 # Next Steps:
-#       Normalize all data and plot operational settins vs measures
+#       Normalize all data and plot operational settings vs measures
 #       Smooth all curves to reduce sensor noise
 #       Determine relationships between each measure and operatioal setting
