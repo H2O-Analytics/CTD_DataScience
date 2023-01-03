@@ -35,17 +35,18 @@
 import cv2
 import sys
 
-s = 0
+s = 0 # default camera device index
 if len(sys.argv) > 1:
     s = sys.argv[1]
 
-source = cv2.VideoCapture(s)
+source = cv2.VideoCapture(s) # s=0, use the video capture system on computer
 
 win_name = 'Camera Preview'
 cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
 
+# continously stream video from camera unless the esc button is pressed
 while cv2.waitKey(1) != 27: # Escape
-    has_frame, frame = source.read()
+    has_frame, frame = source.read() # returns single frame from video stream
     if not has_frame:
         break
     cv2.imshow(win_name, frame)
