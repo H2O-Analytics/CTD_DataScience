@@ -36,6 +36,7 @@ import cv2
 import sys
 import numpy
 
+# run modes
 PREVIEW  = 0   # Preview Mode
 BLUR     = 1   # Blurring Filter
 FEATURES = 2   # Corner Feature Detector
@@ -67,20 +68,24 @@ while alive:
 
     if image_filter == PREVIEW:
         result = frame
+    # edge detection
     elif image_filter == CANNY:
         result = cv2.Canny(frame, 80, 150)
+    # blurring filter. uses box filter to blur image
     elif image_filter == BLUR:
         result = cv2.blur(frame, (13,13))
+    # corner detection
     elif image_filter == FEATURES:
          result = frame
          frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-         corners = cv2.goodFeaturesToTrack(frame_gray, **feature_params)
+         corners = cv2.goodFeaturesToTrack(frame_gray, **feature_params) # ** refers to calling the feature_params dictionary
          if corners is not None:
              for x, y in numpy.float32(corners).reshape(-1, 2):
                  cv2.circle(result, (x,y), 10, (0, 255 , 0), 1)
 
     cv2.imshow(win_name, result)
-
+    
+    # allows for interactive toggling between run modes
     key = cv2.waitKey(1)
     if key == ord('Q') or key == ord('q') or key == 27:
         alive = False
