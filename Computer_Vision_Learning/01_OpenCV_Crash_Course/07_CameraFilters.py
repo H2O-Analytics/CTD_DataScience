@@ -42,7 +42,7 @@ BLUR     = 1   # Blurring Filter
 FEATURES = 2   # Corner Feature Detector
 CANNY    = 3   # Canny Edge Detector
 
-feature_params = dict( maxCorners = 500,
+feature_params = dict( maxCorners = 100,
                        qualityLevel = 0.2,
                        minDistance = 15,
                        blockSize = 9)
