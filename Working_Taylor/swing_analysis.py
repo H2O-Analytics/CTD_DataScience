@@ -43,6 +43,9 @@ df['split'] = df['split'].apply(lambda x: x[0][0])
 # merge in pathnames
 df = pd.merge(df,df_videos,on='id')
 
+# play a video
+display_video(df['path'][0])
+
 df.index = df.index.astype(int)
 df.to_pickle('golfDB.pkl')
 
