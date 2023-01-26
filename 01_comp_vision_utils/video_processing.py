@@ -15,7 +15,7 @@ def display_video(file_path_name):
             # display the resulting frame
             cv2.imshow('Frame',frame)
             # press Q on keyboard to exit
-            if cv2.waitKey(25) & 0xFF == ord('q'):
+            if cv2.waitKey(25) & 0xFF == ord('q'):q
                 break
         
         # Break the loop
@@ -27,4 +27,3 @@ def display_video(file_path_name):
 
     # Close all frames
     cv2.destroyAllWindows()
-            
